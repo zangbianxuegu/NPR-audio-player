@@ -11,121 +11,161 @@
     <script type="text/babel">
 
 
-      var AudioTrackMeta = React.createClass({
+      // var AudioTrackMeta = React.createClass({
+      //
+      //   render: function(){
+      //     return (
+      //       <div>
+      //
+      //       </div>
+      //     );
+      //   }
+      //
+      // });
+      //
+      // var AudioTrackProgressBar = React.createClass({
+      //
+      //   render: function(){
+      //     return (
+      //       <div>
+      //
+      //       </div>
+      //     );
+      //   }
+      //
+      // });
+      //
+      // var AudioTrackTimeElapsed = React.createClass({
+      //
+      //   render: function(){
+      //     return (
+      //       <div>
+      //
+      //       </div>
+      //     );
+      //   }
+      //
+      // });
+      //
+      // var AudioTrackTimeTotal = React.createClass({
+      //
+      //   render: function(){
+      //     return (
+      //       <div>
+      //
+      //       </div>
+      //     );
+      //   }
+      //
+      // });
+      //
+      // var AudioTrack = React.createClass({
+      //
+      //   render: function(){
+      //     return (
+      //       <div>
+      //         <AudioTrackMeta />
+      //         <AudioTrackProgressBar />
+      //         <AudioTrackTimeElapsed />
+      //         <AudioTrackTimeTotal />
+      //       </div>
+      //     );
+      //   }
+      //
+      // });
+      //
+      // var AudioControls = React.createClass({
+      //
+      //   getInitialState: function(){
+      //     return {
+      //       player: false
+      //     }
+      //   },
+      //
+      //   handleClick: function(){
+      //     this.refs.audioPlayer.play()
+      //   },
+      //
+      //   render: function(){
+      //     return (
+      //       <div>
+      //         <button type='button' class='player-play-pause-stop' onClick={this.handleClick}></button>
+      //       </div>
+      //     );
+      //   }
+      //
+      // });
+      //
+      // var AudioWrap = React.createClass({
+      //
+      //   render: function(){
+      //     return (
+      //       <div className='audio-wrap'>
+      //         <AudioControls />
+      //         <AudioTrack />
+      //       </div>
+      //     )
+      //   }
+      // });
+      //
+      // var Player = React.createClass({
+      //   render: function(){
+      //     return (
+      //       <div className='player'>
+      //         <audio controls preload='false' ref='audioPlayer'>
+      //           <source src="http://pd.npr.org/anon.npr-mp3/npr/atc/2016/04/20160421_atc_the_arctic_suicides_its_not_the_dark_that_kills_you.mp3?orgId=1&topicId=1031&aggIds=475000154&d=495&p=2&story=474847921&t=progseg&e=475082290&seg=4&siteplayer=true" />
+      //         </audio>
+      //       </div>
+      //     )
+      //   }
+      // });
+      //
+      // var AudioBox = React.createClass({
+      //   render: function(){
+      //     return (
+      //       <div className='audio-box'>
+      //         <Player />
+      //         <AudioWrap />
+      //       </div>
+      //     )
+      //   }
+      // });
+      //
+      // ReactDOM.render(
+      //   <AudioBox />,
+      //   document.getElementById('container')
+      // );
 
-        render: function(){
-          return (
-            <div>
 
-            </div>
-          );
-        }
 
-      });
-
-      var AudioTrackProgressBar = React.createClass({
-
-        render: function(){
-          return (
-            <div>
-
-            </div>
-          );
-        }
-
-      });
-
-      var AudioTrackTimeElapsed = React.createClass({
-
-        render: function(){
-          return (
-            <div>
-
-            </div>
-          );
-        }
-
-      });
-
-      var AudioTrackTimeTotal = React.createClass({
-
-        render: function(){
-          return (
-            <div>
-
-            </div>
-          );
-        }
-
-      });
-
-      var AudioTrack = React.createClass({
-
-        render: function(){
-          return (
-            <div>
-              <AudioTrackMeta />
-              <AudioTrackProgressBar />
-              <AudioTrackTimeElapsed />
-              <AudioTrackTimeTotal />
-            </div>
-          );
-        }
-
-      });
-
-      var AudioControls = React.createClass({
-
-        getInitialState: function(){
+      var AudioBox = React.createClass({
+        getInitialState: function() {
           return {
-            player: false
+            playing: false
           }
         },
 
-        handleClick: function(){
-          this.refs.audioPlayer.play()
+        handleClick: function() {
+          this.setState({ playing: !this.state.playing });
+          if (!this.state.playing) {
+            this.refs.audioPlayer.play();
+          } else {
+            this.refs.audioPlayer.pause();
+          }
         },
 
         render: function(){
           return (
-            <div>
-              <button type='button' class='player-play-pause-stop' onClick={this.handleClick}></button>
-            </div>
-          );
-        }
-
-      });
-
-      var AudioWrap = React.createClass({
-
-        render: function(){
-          return (
-            <div className='audio-wrap'>
-              <AudioControls />
-              <AudioTrack />
-            </div>
-          )
-        }
-      });
-
-      var Player = React.createClass({
-        render: function(){
-          return (
-            <div className='player'>
+            <div className='audio-box'>
               <audio controls preload='false' ref='audioPlayer'>
                 <source src="http://pd.npr.org/anon.npr-mp3/npr/atc/2016/04/20160421_atc_the_arctic_suicides_its_not_the_dark_that_kills_you.mp3?orgId=1&topicId=1031&aggIds=475000154&d=495&p=2&story=474847921&t=progseg&e=475082290&seg=4&siteplayer=true" />
               </audio>
-            </div>
-          )
-        }
-      });
+              <div className='audio-wrap'>
+                <button className={this.state.playing ? 'player-play-pause-stop playing' : 'player-play-pause-stop'} type='button' onClick={this.handleClick}>Play/Pause</button>
+                <div className='audio-track'>
 
-      var AudioBox = React.createClass({
-        render: function(){
-          return (
-            <div className='audio-box'>
-              <Player />
-              <AudioWrap />
+                </div>
+              </div>
             </div>
           )
         }
