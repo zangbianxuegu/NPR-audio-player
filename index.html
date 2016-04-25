@@ -12,104 +12,80 @@
     <script type="text/babel">
 
 
-      // var AudioTrackMeta = React.createClass({
-      //
-      //   render: function(){
-      //     return (
-      //       <div>
-      //
-      //       </div>
-      //     );
-      //   }
-      //
-      // });
-      //
-      // var AudioTrackProgressBar = React.createClass({
-      //
-      //   render: function(){
-      //     return (
-      //       <div>
-      //
-      //       </div>
-      //     );
-      //   }
-      //
-      // });
-      //
-      // var AudioTrackTimeElapsed = React.createClass({
-      //
-      //   render: function(){
-      //     return (
-      //       <div>
-      //
-      //       </div>
-      //     );
-      //   }
-      //
-      // });
-      //
-      // var AudioTrackTimeTotal = React.createClass({
-      //
-      //   render: function(){
-      //     return (
-      //       <div>
-      //
-      //       </div>
-      //     );
-      //   }
-      //
-      // });
-      //
-      // var AudioTrack = React.createClass({
-      //
-      //   render: function(){
-      //     return (
-      //       <div>
-      //         <AudioTrackMeta />
-      //         <AudioTrackProgressBar />
-      //         <AudioTrackTimeElapsed />
-      //         <AudioTrackTimeTotal />
-      //       </div>
-      //     );
-      //   }
-      //
-      // });
-      //
-      // var AudioControls = React.createClass({
-      //
-      //   getInitialState: function(){
-      //     return {
-      //       player: false
-      //     }
-      //   },
-      //
-      //   handleClick: function(){
-      //     this.refs.audioPlayer.play()
-      //   },
-      //
-      //   render: function(){
-      //     return (
-      //       <div>
-      //         <button type='button' class='player-play-pause-stop' onClick={this.handleClick}></button>
-      //       </div>
-      //     );
-      //   }
-      //
-      // });
+      var AudioTrack = React.createClass({
+
+        getInitialState: function() {
+          return {
+            timeElapsed: '0:00',
+            timeTotal: '0:00'
+          }
+        },
+
+        handlePlayer: function() {
+          this.props.onHandle();
+        },
+
+        componentDidMount: function() {
+          this.setState({
+            timeElapsed: this.handlePlayer().timeElapsed,
+            timeTotal: this.handlePlayer().timeTotal
+          });
+        },
+
+        render: function(){
+          return (
+            <div className='audio-track'>
+              <b ref='AudioTrackMeta' className='track-meta'>The Arctic Suicides: Its Not The Dark That Kills You</b>
+              <b ref='AudioTrackProgressBar' className="progress-bar"></b>
+              <time ref='AudioTrackTimeElapsed' className="time-elapsed" onHandle={this.handlePlayer}>{this.state.timeElapsed}</time>
+              <time ref='AudioTrackTimeTotal' className="time-total" onHandle={this.handlePlayer}>{this.state.timeTotal}</time>
+            </div>
+          );
+        }
+
+      });
+
+      var AudioControls = React.createClass({
+
+        getInitialState: function(){
+          return {
+            playing: false,
+            playingClassName: 'playing'
+          }
+        },
+
+        clickButton: function(){
+          this.props.clickButton();
+          this.setState({playing: !this.state.playing});
+          !this.state.playing ? $(this.refs.button).addClass(this.state.playingClassName) : $(this.refs.button).removeClass(this.state.playingClassName)
+          // $(this.refs.button).toggleClass('playing');
+        },
+
+        render: function(){
+          return (
+            <div>
+              <button type='button' ref='button' className='player-play-pause-stop' onClick={this.clickButton}>Play/Pause</button>
+            </div>
+          );
+        }
+
+      });
 
       var AudioWrap = React.createClass({
 
-        handleClick: function() {
+        handlePlayer: function() {
           this.props.onHandle();
+        },
+
+        clickButton: function() {
+          this.props.clickButton();
         },
 
         render: function(){
           return (
             <div className='audio-wrap'>
-              <button ref='button' className={'player-play-pause-stop'} type='button' onClick={this.handleClick}>Play/Pause</button>
-              <div className='audio-track'>
-
-              </div>
+              <AudioControls clickButton={this.clickButton} />
+              <AudioTrack onHandle={this.handlePlayer} />
             </div>
           )
         }
@@ -121,6 +97,14 @@
           return {
             playing: false
           }
+        },
+
+        timeElapsed: function() {
+          return this.refs.audio.currentTime;
+        },
+
+        timeTotal: function() {
+          return this.refs.audio.duration;
         },
 
         onPlay: function() {
@@ -147,6 +131,13 @@
       var AudioBox = React.createClass({
 
         handlePlayer: function() {
+          return {
+            timeElapsed: this.refs.player.timeElapsed(),
+            timeTotal: this.refs.player.timeTotal()
+          }
+        },
+
+        clickButton: function() {
           !this.refs.player.state.playing ? this.refs.player.onPlay() : this.refs.player.onPause();
         },
 
@@ -154,7 +145,7 @@
           return (
             <div className='audio-box'>
               <Player ref='player' />
-              <AudioWrap ref='audiowrap' onHandle={this.handlePlayer} />
+              <AudioWrap ref='audiowrap' onHandle={this.handlePlayer} clickButton={this.clickButton} />
             </div>
           )
         }
