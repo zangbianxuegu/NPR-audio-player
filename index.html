@@ -5,6 +5,7 @@
     <script src="build/react.js"></script>
     <script src="build/react-dom.js"></script>
     <script src="build/browser.min.js"></script>
+    <script src="build/jquery.min.js"></script>
   </head>
   <body>
     <div id="container"></div>
@@ -95,77 +96,65 @@
       //   }
       //
       // });
-      //
-      // var AudioWrap = React.createClass({
-      //
-      //   render: function(){
-      //     return (
-      //       <div className='audio-wrap'>
-      //         <AudioControls />
-      //         <AudioTrack />
-      //       </div>
-      //     )
-      //   }
-      // });
-      //
-      // var Player = React.createClass({
-      //   render: function(){
-      //     return (
-      //       <div className='player'>
-      //         <audio controls preload='false' ref='audioPlayer'>
-      //           <source src="http://pd.npr.org/anon.npr-mp3/npr/atc/2016/04/20160421_atc_the_arctic_suicides_its_not_the_dark_that_kills_you.mp3?orgId=1&topicId=1031&aggIds=475000154&d=495&p=2&story=474847921&t=progseg&e=475082290&seg=4&siteplayer=true" />
-      //         </audio>
-      //       </div>
-      //     )
-      //   }
-      // });
-      //
-      // var AudioBox = React.createClass({
-      //   render: function(){
-      //     return (
-      //       <div className='audio-box'>
-      //         <Player />
-      //         <AudioWrap />
-      //       </div>
-      //     )
-      //   }
-      // });
-      //
-      // ReactDOM.render(
-      //   <AudioBox />,
-      //   document.getElementById('container')
-      // );
 
+      var AudioWrap = React.createClass({
 
+        handleClick: function() {
+          this.props.onHandle();
+        },
 
-      var AudioBox = React.createClass({
+        render: function(){
+          return (
+            <div className='audio-wrap'>
+              <button ref='button' className={'player-play-pause-stop'} type='button' onClick={this.handleClick}>Play/Pause</button>
+              <div className='audio-track'>
+
+              </div>
+            </div>
+          )
+        }
+      });
+
+      var Player = React.createClass({
+
         getInitialState: function() {
           return {
             playing: false
           }
         },
 
-        handleClick: function() {
-          this.setState({ playing: !this.state.playing });
-          if (!this.state.playing) {
-            this.refs.audioPlayer.play();
-          } else {
-            this.refs.audioPlayer.pause();
-          }
+        onPlay: function() {
+          this.setState({playing: true});
+          this.refs.audio.play();
+        },
+
+        onPause: function() {
+          this.setState({playing: false});
+          this.refs.audio.pause();
+        },
+
+        render: function(){
+          return (
+            <div className='player'>
+              <audio controls preload='false' ref='audio'>
+                <source src="http://pd.npr.org/anon.npr-mp3/npr/atc/2016/04/20160421_atc_the_arctic_suicides_its_not_the_dark_that_kills_you.mp3?orgId=1&topicId=1031&aggIds=475000154&d=495&p=2&story=474847921&t=progseg&e=475082290&seg=4&siteplayer=true" />
+              </audio>
+            </div>
+          )
+        }
+      });
+
+      var AudioBox = React.createClass({
+
+        handlePlayer: function() {
+          !this.refs.player.state.playing ? this.refs.player.onPlay() : this.refs.player.onPause();
         },
 
         render: function(){
           return (
             <div className='audio-box'>
-              <audio controls preload='false' ref='audioPlayer'>
-                <source src="http://pd.npr.org/anon.npr-mp3/npr/atc/2016/04/20160421_atc_the_arctic_suicides_its_not_the_dark_that_kills_you.mp3?orgId=1&topicId=1031&aggIds=475000154&d=495&p=2&story=474847921&t=progseg&e=475082290&seg=4&siteplayer=true" />
-              </audio>
-              <div className='audio-wrap'>
-                <button className={this.state.playing ? 'player-play-pause-stop playing' : 'player-play-pause-stop'} type='button' onClick={this.handleClick}>Play/Pause</button>
-                <div className='audio-track'>
-
-                </div>
-              </div>
+              <Player ref='player' />
+              <AudioWrap ref='audiowrap' onHandle={this.handlePlayer} />
             </div>
           )
         }
@@ -175,6 +164,7 @@
         <AudioBox />,
         document.getElementById('container')
       );
+
     </script>
   </body>
 </html>
