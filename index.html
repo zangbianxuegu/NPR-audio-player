@@ -12,147 +12,138 @@
     <script type="text/babel">
 
 
-      var AudioTrack = React.createClass({
+      var ButtonPanel = React.createClass({
+
+      	render: function() {
+      		var isPlaying = this.props.isPlaying;
+      		var isPause = this.props.isPause;
+      		var isShowPlayBtn = !isPlaying || isPause;
+      		var buttonClickHandler = isShowPlayBtn ? this.props.onPlayBtnClick : this.props.onPauseBtnClick;
+          var classnames = isShowPlayBtn? 'player-play-pause-stop' : 'player-play-pause-stop playing';
+    			return (
+    				<button className={classnames} onClick={buttonClickHandler}></button>
+    			);
+      	}
+      });
+
+      var AudioPlayer = React.createClass({
 
         getInitialState: function() {
           return {
-            timeElapsed: '0:00',
-            timeTotal: '0:00'
+            isPlaying: false,
+            isPause: false,
+            volume: 0.5
           }
         },
 
-        handlePlayer: function() {
-          this.props.onHandle();
+        componentDidUpdate: function() {
+
         },
 
-        componentDidMount: function() {
-          this.setState({
-            timeElapsed: this.handlePlayer().timeElapsed,
-            timeTotal: this.handlePlayer().timeTotal
-          });
-        },
+        render: function() {
+          var percent = 0;
 
-        render: function(){
           return (
-            <div className='audio-track'>
-              <b ref='AudioTrackMeta' className='track-meta'>The Arctic Suicides: Its Not The Dark That Kills You</b>
-              <b ref='AudioTrackProgressBar' className="progress-bar"></b>
-              <time ref='AudioTrackTimeElapsed' className="time-elapsed" onHandle={this.handlePlayer}>{this.state.timeElapsed}</time>
-              <time ref='AudioTrackTimeTotal' className="time-total" onHandle={this.handlePlayer}>{this.state.timeTotal}</time>
+            <div className='audio-player'>
+              <div className='player'>
+                <audio controls preload='false' ref='audio' onTimeUpdate={this.onTimeUpdate} onEnded={this.onEnded}>
+                  <source src="http://pd.npr.org/anon.npr-mp3/npr/atc/2016/04/20160421_atc_the_arctic_suicides_its_not_the_dark_that_kills_you.mp3?orgId=1&topicId=1031&aggIds=475000154&d=495&p=2&story=474847921&t=progseg&e=475082290&seg=4&siteplayer=true" />
+                </audio>
+              </div>
+              <div className='clearfix'>
+                <ButtonPanel isPlaying={this.state.isPlaying} isPause={this.state.isPause} onPlayBtnClick={this.onPlayBtnClick} onPauseBtnClick={this.onPauseBtnClick} />
+                <div ref='progressBar' className='audio-progress-container' onClick={this.onProgressClick} onMouseDown={this.onProgressMouseDown} onTouchMove={this.onProgressTouchMove}>
+                  <div ref='progress' className='audio-progress'></div>
+                </div>
+              </div>
+              <div className='audio-desc-container clearfix'>
+                <span className="audio-name-label pull-left">The Arctic Suicides: Its Not The Dark That Kills You</span>
+              </div>
             </div>
           );
-        }
+        },
 
-      });
-
-      var AudioControls = React.createClass({
-
-        getInitialState: function(){
-          return {
-            playing: false,
-            playingClassName: 'playing'
+        onPlayBtnClick: function() {
+          if(this.state.isPlaying && !this.state.isPause) {
+            return;
           }
+          this.play();
         },
 
-        clickButton: function(){
-          this.props.clickButton();
-          this.setState({playing: !this.state.playing});
-          !this.state.playing ? $(this.refs.button).addClass(this.state.playingClassName) : $(this.refs.button).removeClass(this.state.playingClassName)
-          // $(this.refs.button).toggleClass('playing');
+        onPauseBtnClick: function() {
+          this.setState({isPause: !this.state.isPause});
+          !this.state.isPause ? this.pause() : this._play();
         },
 
-        render: function(){
-          return (
-            <div>
-              <button type='button' ref='button' className='player-play-pause-stop' onClick={this.clickButton}>Play/Pause</button>
-            </div>
-          );
-        }
-
-      });
-
-      var AudioWrap = React.createClass({
-
-        handlePlayer: function() {
-          this.props.onHandle();
+        play: function() {
+          this.setState({isPlaying: true, isPause: false});
+          this._play();
         },
 
-        clickButton: function() {
-          this.props.clickButton();
-        },
-
-        render: function(){
-          return (
-            <div className='audio-wrap'>
-              <AudioControls clickButton={this.clickButton} />
-              <AudioTrack onHandle={this.handlePlayer} />
-            </div>
-          )
-        }
-      });
-
-      var Player = React.createClass({
-
-        getInitialState: function() {
-          return {
-            playing: false
-          }
-        },
-
-        timeElapsed: function() {
-          return this.refs.audio.currentTime;
-        },
-
-        timeTotal: function() {
-          return this.refs.audio.duration;
-        },
-
-        onPlay: function() {
-          this.setState({playing: true});
+        _play: function() {
           this.refs.audio.play();
         },
 
-        onPause: function() {
-          this.setState({playing: false});
+        pause: function() {
           this.refs.audio.pause();
         },
 
-        render: function(){
-          return (
-            <div className='player'>
-              <audio controls preload='false' ref='audio'>
-                <source src="http://pd.npr.org/anon.npr-mp3/npr/atc/2016/04/20160421_atc_the_arctic_suicides_its_not_the_dark_that_kills_you.mp3?orgId=1&topicId=1031&aggIds=475000154&d=495&p=2&story=474847921&t=progseg&e=475082290&seg=4&siteplayer=true" />
-              </audio>
-            </div>
-          )
-        }
-      });
-
-      var AudioBox = React.createClass({
-
-        handlePlayer: function() {
-          return {
-            timeElapsed: this.refs.player.timeElapsed(),
-            timeTotal: this.refs.player.timeTotal()
-          }
+        onEnded: function() {
+          this.refs.audio.pause();
         },
 
-        clickButton: function() {
-          !this.refs.player.state.playing ? this.refs.player.onPlay() : this.refs.player.onPause();
+        onTimeUpdate: function() {
+          var curtime = this.refs.audio.currentTime;
+          var percent = (curtime/this.refs.audio.duration)*100;
+          this.updateProgress(percent);
         },
 
-        render: function(){
-          return (
-            <div className='audio-box'>
-              <Player ref='player' />
-              <AudioWrap ref='audiowrap' onHandle={this.handlePlayer} clickButton={this.clickButton} />
-            </div>
-          )
+        updateProgress: function(percent) {
+          $(this.refs.progress).css('width', (percent + '%'));
+        },
+
+        changeTime: function(percent) {
+          var t = (this.refs.audio.duration * percent);
+          this.refs.audio.currentTime = t;
+        },
+
+        onProgressClick: function(e) {
+          var x;
+    			if (e.targetTouches) {
+    				x = e.targetTouches[0].pageX;
+    			} else {
+    				x = e.clientX;
+    			}
+          this._progress(x);
+        },
+
+        onProgressMouseDown: function(e) {
+          var x;
+    			if (e.targetTouches) {
+    				x = e.targetTouches[0].pageX;
+    			} else {
+    				x = e.clientX;
+    			}
+          this._progress(x);
+        },
+
+        onProgressTouchMove: function(e) {
+          var x = e.targetTouches[0].pageX;
+          this._progress(x);
+        },
+
+        _progress: function(x) {
+          var progressBar = $(this.refs.progressBar);
+          // 小数
+          var percent = (x - progressBar.offset().left) / progressBar.width();
+    			this.updateProgress(percent);
+    			this.changeTime(percent);
         }
+
       });
 
       ReactDOM.render(
-        <AudioBox />,
+        <AudioPlayer />,
         document.getElementById('container')
       );
 
