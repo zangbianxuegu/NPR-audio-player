@@ -2,8 +2,17 @@ audio {
   display: none;
 }
 
-.audio-wrap {
+.audio-player {
+  position: fixed;
+  right: 15px;
+  top: 10px;
+  width: 300px;
+  border-radius: 0 0 5px 5px;
+  background-color: #efefef;
+}
 
+.audio-wrap {
+  position: relative;
 }
 
 .player-play-pause-stop {
@@ -32,13 +41,37 @@ audio {
 }
 
 .audio-progress-container {
-  width: 200px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 300px;
   height: 20px;
-  background-color: #ccc;
+  background-color: #58657f;
 }
 
 .audio-progress {
   height: 100%;
   width: 0;
-  background-color: #f00;
+  background-color: #6d8ac4;
+}
+
+.audio-desc-container {
+  display: table-row;
+  height: 20px;
+  overflow: hidden;
+}
+
+.audio-time-current {
+  display: table-cell;
+  width: 1%
+}
+
+.audio-time-duration {
+  display: table-cell;
+  width: 1%;
+}
+
+.audio-name-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

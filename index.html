@@ -2,15 +2,14 @@
 <html>
   <head>
     <link rel="stylesheet" href="assets/css/style.css">
-    <script src="build/react.js"></script>
-    <script src="build/react-dom.js"></script>
+    <script src="https://fb.me/react-15.0.1.js"></script>
+    <script src="https://fb.me/react-dom-15.0.1.js"></script>
     <script src="build/browser.min.js"></script>
     <script src="build/jquery.min.js"></script>
   </head>
   <body>
     <div id="container"></div>
     <script type="text/babel">
-
 
       var ButtonPanel = React.createClass({
 
@@ -32,12 +31,14 @@
           return {
             isPlaying: false,
             isPause: false,
+            isLoading: false,
+            isProgressMouseDown: false,
             volume: 0.5
           }
         },
 
         componentDidUpdate: function() {
-
+          this.initAudioObject();
         },
 
         render: function() {
@@ -52,12 +53,14 @@
               </div>
               <div className='clearfix'>
                 <ButtonPanel isPlaying={this.state.isPlaying} isPause={this.state.isPause} onPlayBtnClick={this.onPlayBtnClick} onPauseBtnClick={this.onPauseBtnClick} />
-                <div ref='progressBar' className='audio-progress-container' onClick={this.onProgressClick} onMouseDown={this.onProgressMouseDown} onTouchMove={this.onProgressTouchMove}>
+                <div ref='progressBar' className='audio-progress-container' onClick={this.onProgressClick} onMouseDown={this.onProgressMouseDown} onMouseMove={this.onProgressMouseMove} onMouseUp={this.onProgressMouseUp} onTouchMove={this.onProgressTouchMove}>
                   <div ref='progress' className='audio-progress'></div>
                 </div>
-              </div>
-              <div className='audio-desc-container clearfix'>
-                <span className="audio-name-label pull-left">The Arctic Suicides: Its Not The Dark That Kills You</span>
+                <div className='audio-desc-container clearfix'>
+                  <span ref='audioTimeCurrent' className='audio-time-current'></span>
+                  <span className="audio-name-label">The Arctic Suicides: Its Not The Dark That Kills You</span>
+                  <span ref='audioTimeDuration' className='audio-time-duration'></span>
+                </div>
               </div>
             </div>
           );
@@ -94,12 +97,47 @@
 
         onTimeUpdate: function() {
           var curtime = this.refs.audio.currentTime;
-          var percent = (curtime/this.refs.audio.duration)*100;
+          var percent = (curtime/this.refs.audio.duration);
           this.updateProgress(percent);
+          this.updateTime();
+        },
+
+        onProgressClick: function(e) {
+          var x = e.targetTouches ? e.targetTouches[0].pageX : e.clientX;
+          this._progress(x);
+        },
+
+        onProgressMouseDown: function(e) {
+          var x = e.targetTouches ? e.targetTouches[0].pageX : e.clientX;
+          this._progress(x);
+          this.setState({isProgressMouseDown: true});
+        },
+
+        onProgressMouseMove: function(e) {
+          if(this.state.isProgressMouseDown) {
+            var x = e.targetTouches ? e.targetTouches[0].pageX : e.clientX;
+            this._progress(x);
+          }
+        },
+
+        onProgressMouseUp: function() {
+          this.setState({isProgressMouseDown: false});
+        },
+
+        onProgressTouchMove: function(e) {
+          var x = e.targetTouches ? e.targetTouches[0].pageX : e.clientX;
+          this._progress(x);
+        },
+
+        _progress: function(x) {
+          var progressBar = $(this.refs.progressBar);
+          var percent = (x - progressBar.offset().left) / progressBar.width(); // 小数
+    			this.updateProgress(percent);
+    			this.changeTime(percent);
         },
 
         updateProgress: function(percent) {
-          $(this.refs.progress).css('width', (percent + '%'));
+          $(this.refs.progress).css('width', (percent*100 + '%'));
         },
 
         changeTime: function(percent) {
@@ -107,37 +145,15 @@
           this.refs.audio.currentTime = t;
         },
 
-        onProgressClick: function(e) {
-          var x;
-    			if (e.targetTouches) {
-    				x = e.targetTouches[0].pageX;
-    			} else {
-    				x = e.clientX;
-    			}
-          this._progress(x);
+        updateTime: function() {
+          var currentTime = Math.round(this.refs.audio.currentTime);
+          var duration = Math.round(this.refs.audio.duration);
+          this.refs.audioTimeCurrent.innerHTML = currentTime;
+          this.refs.audioTimeDuration.innerHTML = duration;
         },
 
-        onProgressMouseDown: function(e) {
-          var x;
-    			if (e.targetTouches) {
-    				x = e.targetTouches[0].pageX;
-    			} else {
-    				x = e.clientX;
-    			}
-          this._progress(x);
-        },
-
-        onProgressTouchMove: function(e) {
-          var x = e.targetTouches[0].pageX;
-          this._progress(x);
-        },
-
-        _progress: function(x) {
-          var progressBar = $(this.refs.progressBar);
-          // 小数
-          var percent = (x - progressBar.offset().left) / progressBar.width();
-    			this.updateProgress(percent);
-    			this.changeTime(percent);
+        initAudioObject: function() {
+          this.setState({isLoading: true});
         }
 
       });
